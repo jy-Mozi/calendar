@@ -1,0 +1,15 @@
+{
+  "name": "오늘한장",
+  "short_name": "오늘한장",
+  "description": "일정 · 할일 · 가계부를 한 장에",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef0f3",
+  "theme_color": "#15171a",
+  "lang": "ko",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

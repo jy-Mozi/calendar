@@ -5,6 +5,9 @@ const PUBLIC_PATHS = ['/login', '/auth'];
 
 /** Refreshes the Supabase session cookie and redirects anonymous users to /login. */
 export async function updateSession(request: NextRequest) {
+  // 로컬 화면 확인용. 운영 빌드(NODE_ENV=production)에서는 무시된다.
+  if (process.env.NODE_ENV !== 'production' && process.env.AUTH_DEV_BYPASS === '1') return NextResponse.next({ request });
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

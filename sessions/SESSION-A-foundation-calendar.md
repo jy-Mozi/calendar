@@ -337,6 +337,15 @@ web/src/
 2026-10-14 — 📝 작업 위치: 워크트리 `D:\ChaAi\06_calendar-wt\a-foundation-calendar`, 브랜치 `feat/a-foundation-calendar`, 커밋 6f3f1c9(rebase 후). 마이그레이션 `20261014120000_s0a_core_schema.sql`(14개 테이블·RLS), `20261014120100_s0a_new_user_defaults.sql`(가입 트리거), `supabase/tests/rls.sql`. **타입(`types.ts`)은 아직 없음** — DB 기동 후 생성.
 2026-10-14 — 📝 계약: ① 종일 일정은 start_at/end_at을 KST 자정 시각(UTC 저장)으로, end는 배타적(다음날 자정). ② `integrations.tokens`는 암호문 text, `mcp_tokens.token_hash`와 함께 클라이언트(authenticated)에서 select 불가(컬럼 권한) — 읽기/쓰기는 service role Edge Function. ③ `mcp_logs`는 클라이언트 select/delete만, insert는 service role. ④ `user_id`는 `default auth.uid()`. ⑤ 가입 시 카테고리(일정 5·가계부 9)와 프로젝트(업무·생활·개인) 자동 생성. ⑥ `integrations`는 UNIQUE(user_id, provider), 웹푸시 구독 저장 위치는 S4가 정해 공지.
 2026-10-14 — 📝 인증 코드 작성(원격 DB 연결 전, lint·tsc·build 통과): `web/src/lib/supabase/{client,server,proxy}.ts`, `web/src/proxy.ts`(Next 16 규칙, 비로그인 → /login), `/login`, `/auth/callback`, `/auth/signout`(POST), `.env.example`. `db:types`는 `supabase gen types --linked`(link 후 사용). `lib/db/types.ts`는 임시 `any` 자리표시자 — 첫 db push 후 생성물로 교체. ⛔ 대기: 사용자의 `supabase login`·프로젝트 ref·첫 `db push` 승인.
+2026-10-14 — ✅ **파트 2(S0B) 골격 완료, 목업 동작** (lint·tsc·build 통과, 모든 화면 로드·콘솔 오류 0, 홈 픽셀 차이 1.8%). 사용법은 `docs/data-pattern.md`. 요약:
+  - 셸: `src/components/shell/AppShell.tsx`(탭·서브탭·FAB·토스트·단축키 N/Esc), 라우트 `(app)/{page,calendar,todo,ledger,search,settings}`. 서브탭은 URL 쿼리(`view`, `section`, `filter`, `date`, `cat`, `q`, `type`)로 유지.
+  - api 인터페이스(각 영역 `types.ts`의 `*Api`, 진입점 `api.ts`의 `calendarApi/todoApi/ledgerApi/weatherApi/settingsApi/searchApi`, 목업 `api.mock.ts`): calendar `listEvents({from,to})·createEvent·updateEvent(id,patch,scope?)·deleteEvent(id,scope?)` / todo `listTodos(filter)·createTodo·updateTodo·setStatus·deleteTodo·listProjects` / ledger `listTransactions(filter)·createTransaction·updateTransaction·deleteTransaction·getMonthSummary(YYYY-MM)·getBudgetStatus(month)·listAccounts·listRecurring·setRecurringActive` / weather `getForecast(location)→{current,hourly,daily}` / settings `getSettings·updateSettings·listTokens·issueToken·revokeToken` / search `search(q)`.
+  - **교체 방법**: 각 영역 `api.ts`의 한 줄을 `USE_MOCK ? mock : supabase` 로 바꾼다(`@/lib/clock`의 `USE_MOCK`, `NEXT_PUBLIC_USE_MOCK=0`). 타입은 DB 행이 아니라 `types.ts`의 도메인 타입(camelCase, 시각 UTC ISO, 날짜 YYYY-MM-DD) — supabase 구현에서 행↔도메인 변환.
+  - 공통: `lib/query.ts`(useQuery/mutate/patchCache/invalidate, 실패 시 롤백+토스트), `lib/format.ts`(KST 변환·금액), `lib/decor.ts`, `components/ui/colors.ts`, `useToast`. 각 영역의 `use<영역>Vals.ts`가 화면 값을 만들고 `views/*`가 표시한다(뷰는 여전히 `v` 값 묶음을 받는 상태 — 영역 세션이 자기 폴더에서 자유롭게 정리).
+  - 빠른 추가: 셸 `components/quick-add/`, 탭별 입력란은 `features/{calendar,todo,ledger}/quick-add.tsx`.
+  - 로컬에서 로그인 없이 보기: `web/.env.local`에 `AUTH_DEV_BYPASS=1`(운영 빌드에서는 무시).
+  - 아직 남은 S0B 항목: `@ts-nocheck`는 제거됨(뷰는 `Vals` 느슨한 타입), 인라인 스타일의 공통 컴포넌트화·접근성 점검(대비·키보드)·다크 테마는 미완. 영역 간 순환 import 없음(다른 영역은 `api.ts`/`types.ts`만 참조, 예외는 quick-add 셸).
+  - 브랜치는 아직 푸시하지 않음. B·C가 골격을 쓰려면 PR 머지(또는 브랜치 푸시) 필요.
 
 ## 받은 요청 (다른 세션이 한 줄씩 추가)
 - 2026-10-14 C→A: `weather_cache`에 `UNIQUE(lat_key, lon_key)`를 두고 두 키를 numeric(소수 1자리 반올림 값)으로 정의해 주세요. weather Edge Function이 upsert에 사용합니다.
