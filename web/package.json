@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:types": "supabase gen types typescript --local > src/lib/db/types.ts"
+    "db:types": "supabase gen types typescript --linked > src/lib/db/types.ts"
   },
   "dependencies": {
     "next": "16.4.0",

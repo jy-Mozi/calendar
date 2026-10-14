@@ -1,6 +1,6 @@
--- RLS isolation test. Run against a local DB after `supabase db reset`:
---   psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql
--- Everything runs in one transaction and is rolled back.
+-- RLS isolation test. Runs against the (dev-only) remote DB inside one transaction that is always rolled back,
+-- so no test users or rows remain. Run with the DB connection string from your own env:
+--   psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql
 begin;
 
 insert into auth.users (id, instance_id, aud, role, email)
