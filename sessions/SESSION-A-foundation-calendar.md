@@ -346,6 +346,7 @@ web/src/
   - 로컬에서 로그인 없이 보기: `web/.env.local`에 `AUTH_DEV_BYPASS=1`(운영 빌드에서는 무시).
   - 아직 남은 S0B 항목: `@ts-nocheck`는 제거됨(뷰는 `Vals` 느슨한 타입), 인라인 스타일의 공통 컴포넌트화·접근성 점검(대비·키보드)·다크 테마는 미완. 영역 간 순환 import 없음(다른 영역은 `api.ts`/`types.ts`만 참조, 예외는 quick-add 셸).
   - 브랜치는 아직 푸시하지 않음. B·C가 골격을 쓰려면 PR 머지(또는 브랜치 푸시) 필요.
+2026-10-14 — ✅ 브랜치 `feat/a-foundation-calendar` origin 푸시 완료(dd1fde1). `gh` CLI가 없어 PR은 아직 미생성 — 생성 링크: https://github.com/jy-Mozi/calendar/pull/new/feat/a-foundation-calendar (파트 1 SQL은 원격 미적용·미검증 상태 포함)
 
 ## 받은 요청 (다른 세션이 한 줄씩 추가)
 - 2026-10-14 C→A: `weather_cache`에 `UNIQUE(lat_key, lon_key)`를 두고 두 키를 numeric(소수 1자리 반올림 값)으로 정의해 주세요. weather Edge Function이 upsert에 사용합니다.
