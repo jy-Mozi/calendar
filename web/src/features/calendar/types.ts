@@ -16,6 +16,10 @@ export type CalendarEvent = {
   source: EventSource;
   rrule?: string | null;
   recurrenceParentId?: string | null;
+  /** 예외 인스턴스가 덮어쓰는 원래 회차의 시작 시각 */
+  recurrenceOriginalStart?: string | null;
+  /** 예외 인스턴스 삭제(그 회차만 지움) */
+  cancelled?: boolean;
   /** 시작 N분 전 목록 */
   reminders?: number[];
 };

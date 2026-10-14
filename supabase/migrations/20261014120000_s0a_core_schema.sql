@@ -59,6 +59,9 @@ create table public.events (
   category_id uuid references public.categories (id) on delete set null,
   rrule text,
   recurrence_parent_id uuid references public.events (id) on delete cascade,
+  -- exception instances: the occurrence start this row overrides; cancelled = that occurrence was deleted
+  recurrence_original_start timestamptz,
+  cancelled boolean not null default false,
   reminders jsonb not null default '[]'::jsonb,
   google_event_id text,
   google_calendar_id text,
@@ -69,6 +72,8 @@ create table public.events (
   constraint events_end_after_start check (end_at >= start_at)
 );
 create index events_user_start_idx on public.events (user_id, start_at);
+create unique index events_recurrence_override_idx on public.events (recurrence_parent_id, recurrence_original_start)
+  where recurrence_parent_id is not null;
 create index events_recurrence_parent_idx on public.events (recurrence_parent_id)
   where recurrence_parent_id is not null;
 create unique index events_google_unique_idx
