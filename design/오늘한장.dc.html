@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap">
+<style>@font-face{font-family:'YeogiOttaeJalnan';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff') format('woff');font-weight:normal;font-display:swap}body{margin:0;background:#eef0f3;font-family:YeogiOttaeJalnan,Pretendard,sans-serif;color:#15171a}a{color:oklch(0.48 0.15 255);text-decoration:none}a:hover{color:oklch(0.4 0.15 255)}*{box-sizing:border-box}input,select,button,option{font-family:inherit}</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;max-width:1360px;margin:0 auto;padding-bottom:110px">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 28px;flex-wrap:wrap">
+    <button onClick="{{ goHome }}" style="border:0;background:none;cursor:pointer;padding:0;font:400 20px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em;color:#15171a">오늘한장</button>
+    <div style="display:flex;gap:4px;background:#fff;padding:5px;border-radius:999px;overflow-x:auto">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+        <button onClick="{{ tb.go }}" style="border:0;cursor:pointer;padding:8px 18px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;background:{{ tb.bg }};color:{{ tb.fg }}">{{ tb.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onClick="{{ goSearch }}" style="border:0;cursor:pointer;padding:10px 16px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ searchBtnBg }};color:{{ searchBtnFg }}">검색</button>
+      <button onClick="{{ goSettings }}" style="border:0;cursor:pointer;padding:10px 16px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ setBtnBg }};color:{{ setBtnFg }}">설정</button>
+      <span style="width:38px;height:38px;border-radius:50%;background:#d7dbe1;display:flex;align-items:center;justify-content:center;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif">민</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ hasSub }}">
+    <div style="display:flex;gap:6px;padding:0 28px 18px;overflow-x:auto">
+      <sc-for list="{{ subTabs }}" as="st">
+        <button onClick="{{ st.go }}" style="cursor:pointer;padding:8px 16px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;border:1.5px solid {{ st.bd }};background:{{ st.bg }};color:{{ st.fg }}">{{ st.label }}</button>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:{{ homeCols }};grid-template-areas:{{ homeAreas }};gap:18px;padding:0 28px">
+      <div style="grid-area:greet;background:#fff;border-radius:28px;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font:500 15px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">10월 14일 수요일</div>
+          <div style="font:400 32px/1.35 YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.03em;text-wrap:pretty">민지 님, 오늘은 일정 <span style="color:oklch(0.55 0.15 255)">{{ todayEventCount }}개</span>,<br>할일 <span style="color:oklch(0.5 0.15 155)">{{ todoLeft }}개</span>가 남았어요.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-direction:column;align-items:flex-start">
+          <span style="white-space:nowrap;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;padding:8px 14px;border-radius:999px;background:oklch(0.95 0.03 255);color:oklch(0.42 0.15 255)">{{ gcalBadge }}</span>
+          <span style="white-space:nowrap;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;padding:8px 14px;border-radius:999px;background:#f1f2f4;color:#3f444b">Claude MCP 연결됨 · 토큰 {{ tokenCount }}개</span>
+        </div>
+      </div>
+      <div style="grid-area:wx;background:oklch(0.62 0.13 255);color:#fff;border-radius:28px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ city }} · 지금</div>
+        <div style="display:flex;align-items:flex-end;gap:14px"><span style="font:400 84px/0.9 YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.04em">18°</span><span style="font:600 18px YeogiOttaeJalnan,Pretendard,sans-serif;padding-bottom:8px">맑음</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px">
+          <div style="background:rgba(255,255,255,.16);border-radius:14px;padding:10px"><div>최고/최저</div><div style="font:700 16px YeogiOttaeJalnan,Pretendard,sans-serif">21° / 11°</div></div>
+          <div style="background:rgba(255,255,255,.16);border-radius:14px;padding:10px"><div>강수</div><div style="font:700 16px YeogiOttaeJalnan,Pretendard,sans-serif">10%</div></div>
+          <div style="background:rgba(255,255,255,.16);border-radius:14px;padding:10px"><div>미세먼지</div><div style="font:700 16px YeogiOttaeJalnan,Pretendard,sans-serif">좋음</div></div>
+        </div>
+        <div style="background:#fff;color:#15171a;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px">
+          <sc-for list="{{ week }}" as="w" hint-placeholder-count="7">
+            <div style="display:grid;grid-template-columns:28px 1fr 40px 60px;gap:8px;align-items:center;font-size:14px;padding:5px 0">
+              <span style="font-weight:700">{{ w.d }}</span><span style="color:#5b6068">{{ w.s }}</span>
+              <span style="font-size:12px;color:oklch(0.48 0.15 255);font-weight:600">{{ w.pTxt }}</span>
+              <span style="text-align:right;font-weight:600">{{ w.hi }}° <span style="color:#7b8088;font-weight:400">{{ w.lo }}°</span></span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;background:rgba(255,255,255,.16);border-radius:14px;padding:12px">금요일 비 예보 — 마감 회의 가는 길에 우산을 챙기세요</div>
+      </div>
+      <div style="grid-area:ev;background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif;display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:oklch(0.62 0.13 255)"></span>오늘 일정</span><button onClick="{{ goCal }}" style="border:0;background:none;cursor:pointer;font-size:13px;color:#5b6068">캘린더 →</button></div>
+        <sc-for list="{{ todayEvents }}" as="e" hint-placeholder-count="4">
+          <div style="display:flex;gap:14px;align-items:center;background:#f5f6f8;border-radius:16px;padding:12px 14px">
+            <div style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif;width:52px">{{ e.timeTxt }}</div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ e.title }}</span><span style="font-size:13px;color:#5b6068">{{ e.place }}</span></div>
+            <span style="width:6px;height:28px;border-radius:3px;background:{{ e.color }}"></span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="grid-area:td;display:flex;flex-direction:column;gap:18px">
+        <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif;display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:oklch(0.62 0.13 155)"></span>오늘 할일</span><span style="font-size:13px;color:#5b6068">{{ todayDone }}/{{ todayTotal }} 완료</span></div>
+          <sc-for list="{{ todayTodos }}" as="t" hint-placeholder-count="4">
+            <div onClick="{{ t.toggle }}" style="display:flex;gap:12px;align-items:center;padding:6px 0;cursor:pointer">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid oklch(0.62 0.13 155);background:{{ t.fill }};display:flex;align-items:center;justify-content:center;color:#fff;font:700 12px sans-serif;flex-shrink:0"><sc-if value="{{ t.done }}">✓</sc-if></div>
+              <span style="font:500 15px YeogiOttaeJalnan,Pretendard,sans-serif;flex:1;text-decoration:{{ t.deco }};opacity:{{ t.op }}">{{ t.title }}</span>
+              <sc-if value="{{ t.late }}"><span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;padding:4px 8px;border-radius:999px;background:oklch(0.95 0.04 25);color:oklch(0.48 0.17 25)">지연</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif;display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:oklch(0.62 0.13 55)"></span>10월 가계</span><span style="font-size:13px;color:#5b6068">예산 {{ budgetPct }}% 사용</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap"><span style="font:800 30px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">{{ expenseTxt }}</span><span style="font-size:14px;color:#5b6068">원 지출 · 잔액 {{ balanceTxt }}원</span></div>
+          <div style="height:12px;border-radius:6px;background:#f1f2f4;display:flex;overflow:hidden"><div style="width:{{ budgetBar }}%;background:oklch(0.62 0.13 55)"></div></div>
+          <sc-if value="{{ warnBudget }}"><div style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:oklch(0.45 0.13 55)">{{ warnBudget.name }} 예산 {{ warnBudget.pct }}% — 이번 주는 조금 아껴요</div></sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCalMonth }}">
+    <div style="display:grid;grid-template-columns:{{ splitCols }};gap:18px;padding:0 28px">
+      <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="font:400 24px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">2026년 10월</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <sc-for list="{{ overlays }}" as="ov">
+              <button onClick="{{ ov.flip }}" style="cursor:pointer;padding:7px 12px;border-radius:999px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;border:1.5px solid {{ ov.bd }};background:{{ ov.bg }};color:{{ ov.fg }}">{{ ov.mark }} {{ ov.label }}</button>
+            </sc-for>
+            <button onClick="{{ goToday }}" style="border:1px solid #dfe2e6;background:#fff;border-radius:999px;padding:7px 14px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">오늘</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+          <sc-for list="{{ dows }}" as="dw" hint-placeholder-count="7"><div style="font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:{{ dw.c }};text-align:center;padding:4px 0">{{ dw.t }}</div></sc-for>
+          <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+            <div onClick="{{ c.pick }}" style="min-height:100px;border-radius:14px;padding:8px;background:{{ c.bg }};outline:{{ c.ol }};cursor:{{ c.cur }};display:flex;flex-direction:column;gap:4px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ c.numBg }};color:{{ c.numFg }}">{{ c.label }}</span>
+                <span style="font:500 11px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068;white-space:nowrap">{{ c.wx }}</span>
+              </div>
+              <sc-for list="{{ c.chips }}" as="ch">
+                <div style="font:600 11px YeogiOttaeJalnan,Pretendard,sans-serif;padding:3px 6px;border-radius:6px;background:{{ ch.bg }};color:{{ ch.fg }};border:1px dashed {{ ch.bd }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ch.title }}</div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;align-self:start">
+        <div style="font:500 14px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">선택한 날</div>
+        <div style="font:400 24px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">10월 {{ selDay }}일 {{ selDow }}요일</div>
+        <sc-if value="{{ selWx }}"><div style="font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;padding:10px 14px;border-radius:14px;background:oklch(0.95 0.03 255);color:oklch(0.42 0.15 255)">{{ selWx }}</div></sc-if>
+        <sc-for list="{{ selEvents }}" as="e" hint-placeholder-count="2">
+          <div style="display:flex;gap:12px;align-items:center;background:#f5f6f8;border-radius:16px;padding:12px 14px">
+            <span style="width:6px;height:32px;border-radius:3px;background:{{ e.color }}"></span>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ e.title }}</span><span style="font-size:13px;color:#5b6068">{{ e.timeTxt }} · {{ e.place }}</span></div>
+            <span style="font:500 11px YeogiOttaeJalnan,Pretendard,sans-serif;color:#7b8088">{{ e.src }}</span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ selEmpty }}"><div style="font-size:14px;color:#5b6068;padding:8px 0">일정이 없어요.</div></sc-if>
+        <button onClick="{{ addEventSel }}" style="border:0;border-radius:14px;padding:12px;background:#15171a;color:#fff;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">+ 이 날 일정 추가</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCalWeek }}">
+    <div style="padding:0 28px">
+      <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:16px;overflow-x:auto">
+        <div style="font:400 24px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">10월 12일 – 18일</div>
+        <div style="display:grid;grid-template-columns:56px repeat(7,minmax(96px,1fr));min-width:760px">
+          <div></div>
+          <sc-for list="{{ weekDays }}" as="wd" hint-placeholder-count="7">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:10px">
+              <span style="font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ wd.dow }}</span>
+              <span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ wd.numBg }};color:{{ wd.numFg }}">{{ wd.date }}</span>
+              <span style="font:500 11px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068;min-height:14px">{{ wd.wx }}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ hours }}" as="h" hint-placeholder-count="14"><div style="height:48px;font:500 11px YeogiOttaeJalnan,Pretendard,sans-serif;color:#7b8088;transform:translateY(-6px)">{{ h }}</div></sc-for>
+          </div>
+          <sc-for list="{{ weekDays }}" as="wd" hint-placeholder-count="7">
+            <div style="position:relative;height:672px;border-left:1px solid #f1f2f4;background:repeating-linear-gradient(to bottom,#f1f2f4 0 1px,transparent 1px 48px);background-color:{{ wd.colBg }}">
+              <sc-for list="{{ wd.evs }}" as="ev">
+                <div style="position:absolute;left:4px;right:4px;top:{{ ev.top }}px;height:{{ ev.h }}px;border-radius:10px;padding:6px 8px;background:{{ ev.bg }};color:{{ ev.fg }};border-left:3px solid {{ ev.bd }};overflow:hidden;display:flex;flex-direction:column;gap:2px">
+                  <span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ev.title }}</span>
+                  <span style="font:500 11px YeogiOttaeJalnan,Pretendard,sans-serif">{{ ev.timeTxt }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCalList }}">
+    <div style="padding:0 28px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ evCatFilters }}" as="f">
+          <button onClick="{{ f.go }}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:999px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ upcoming }}" as="g" hint-placeholder-count="4">
+        <div style="background:#fff;border-radius:24px;padding:20px 24px;display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">{{ g.dateTxt }}</span>
+            <span style="font:500 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ g.rel }}</span>
+            <span style="font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:oklch(0.45 0.15 255)">{{ g.wx }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ g.items }}" as="e">
+              <div style="display:flex;gap:12px;align-items:center;background:#f5f6f8;border-radius:14px;padding:10px 14px">
+                <span style="font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;width:48px">{{ e.timeTxt }}</span>
+                <span style="width:6px;height:24px;border-radius:3px;background:{{ e.color }}"></span>
+                <div style="display:flex;flex-direction:column;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ e.title }}</span><span style="font-size:13px;color:#5b6068">{{ e.cat }} · {{ e.place }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isTodo }}">
+    <div style="padding:0 28px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+          <div style="background:#fff;border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif"><span>{{ p.name }}</span><span style="color:#5b6068;font-weight:500">{{ p.done }}/{{ p.total }} · {{ p.pct }}%</span></div>
+            <div style="height:8px;border-radius:4px;background:#f1f2f4;overflow:hidden"><div style="width:{{ p.pct }}%;height:8px;background:oklch(0.62 0.13 155)"></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ isTodoList }}">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;gap:4px;background:#fff;padding:4px;border-radius:999px">
+            <sc-for list="{{ todoFilters }}" as="f" hint-placeholder-count="3">
+              <button onClick="{{ f.go }}" style="border:0;cursor:pointer;padding:8px 16px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }} <span style="opacity:.6">{{ f.n }}</span></button>
+            </sc-for>
+          </div>
+          <button onClick="{{ addTodo }}" style="border:0;border-radius:999px;padding:10px 18px;background:oklch(0.5 0.13 155);color:#fff;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">+ 할일 추가</button>
+        </div>
+        <div style="background:#fff;border-radius:28px;padding:12px 24px;display:flex;flex-direction:column">
+          <sc-for list="{{ todoList }}" as="t" hint-placeholder-count="5">
+            <div style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #f1f2f4;flex-wrap:wrap">
+              <div onClick="{{ t.toggle }}" style="width:24px;height:24px;border-radius:50%;border:2px solid oklch(0.62 0.13 155);background:{{ t.fill }};display:flex;align-items:center;justify-content:center;color:#fff;font:700 12px sans-serif;flex-shrink:0;cursor:pointer"><sc-if value="{{ t.done }}">✓</sc-if></div>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:160px"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif;text-decoration:{{ t.deco }};opacity:{{ t.op }}">{{ t.title }}</span><span style="font-size:13px;color:#5b6068">{{ t.project }} · {{ t.dueTxt }} · {{ t.statusTxt }}</span></div>
+              <sc-if value="{{ t.late }}"><span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;padding:4px 10px;border-radius:999px;background:oklch(0.95 0.04 25);color:oklch(0.48 0.17 25)">지연</span></sc-if>
+              <span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;padding:4px 10px;border-radius:999px;background:{{ t.pBg }};color:{{ t.pFg }}">우선순위 {{ t.prio }}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ todoEmpty }}"><div style="padding:24px 0;font-size:14px;color:#5b6068">표시할 할일이 없어요.</div></sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isTodoBoard }}">
+        <div style="display:grid;grid-template-columns:{{ boardCols }};gap:18px">
+          <sc-for list="{{ board }}" as="col" hint-placeholder-count="3">
+            <div style="background:#e4e7eb;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px"><span style="font:400 16px YeogiOttaeJalnan,Pretendard,sans-serif;display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:{{ col.dot }}"></span>{{ col.label }}</span><span style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ col.n }}</span></div>
+              <sc-for list="{{ col.items }}" as="t">
+                <div style="background:#fff;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px">
+                  <span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif;text-decoration:{{ t.deco }};opacity:{{ t.op }}">{{ t.title }}</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                    <span style="font:700 11px YeogiOttaeJalnan,Pretendard,sans-serif;padding:3px 8px;border-radius:999px;background:{{ t.pBg }};color:{{ t.pFg }}">{{ t.prio }}</span>
+                    <span style="font:500 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ t.project }} · {{ t.dueTxt }}</span>
+                    <sc-if value="{{ t.late }}"><span style="font:700 11px YeogiOttaeJalnan,Pretendard,sans-serif;color:oklch(0.48 0.17 25)">지연</span></sc-if>
+                  </div>
+                  <div style="display:flex;gap:6px;justify-content:flex-end">
+                    <sc-if value="{{ t.canBack }}"><button onClick="{{ t.back }}" style="border:0;background:#f1f2f4;border-radius:10px;padding:6px 10px;font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">← {{ t.backLabel }}</button></sc-if>
+                    <sc-if value="{{ t.canFwd }}"><button onClick="{{ t.fwd }}" style="border:0;background:#15171a;color:#fff;border-radius:10px;padding:6px 10px;font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">{{ t.fwdLabel }} →</button></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isLedger }}">
+    <div style="padding:0 28px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">
+        <div style="background:#fff;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:#5b6068">10월 수입</span><span style="font:800 28px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em;color:oklch(0.45 0.13 255)">{{ incomeTxt }}원</span></div>
+        <div style="background:#fff;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:#5b6068">10월 지출</span><span style="font:800 28px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">{{ expenseTxt }}원</span></div>
+        <div style="background:oklch(0.62 0.13 55);color:#fff;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:6px"><span style="font-size:14px">잔액</span><span style="font:800 28px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">{{ balanceTxt }}원</span></div>
+      </div>
+
+      <sc-if value="{{ isLgTx }}">
+        <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:4px;min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:8px">
+            <div style="display:flex;gap:4px;background:#f1f2f4;padding:4px;border-radius:999px">
+              <sc-for list="{{ txFilters }}" as="f"><button onClick="{{ f.go }}" style="border:0;cursor:pointer;padding:7px 14px;border-radius:999px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}</button></sc-for>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center"><span style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">합계 {{ txSumTxt }}</span><button onClick="{{ addTx }}" style="border:0;border-radius:999px;padding:8px 16px;background:oklch(0.5 0.13 55);color:#fff;font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">+ 거래 추가</button></div>
+          </div>
+          <sc-for list="{{ txList }}" as="x" hint-placeholder-count="6">
+            <div style="display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid #f1f2f4">
+              <span style="width:40px;height:40px;border-radius:12px;background:{{ x.bg }};color:{{ x.fg }};display:flex;align-items:center;justify-content:center;font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;flex-shrink:0">{{ x.cat1 }}</span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ x.title }}</span><span style="font-size:13px;color:#5b6068">10월 {{ x.date }}일 · {{ x.cat }} · {{ x.account }}</span></div>
+              <span style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif;color:{{ x.amtColor }};white-space:nowrap">{{ x.amtTxt }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLgCal }}">
+        <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px">
+          <div style="font:400 20px YeogiOttaeJalnan,Pretendard,sans-serif">10월 날짜별 수입·지출</div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+            <sc-for list="{{ dows }}" as="dw"><div style="font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:{{ dw.c }};text-align:center;padding:4px 0">{{ dw.t }}</div></sc-for>
+            <sc-for list="{{ lgCells }}" as="c" hint-placeholder-count="35">
+              <div style="min-height:84px;border-radius:14px;padding:8px;background:{{ c.bg }};display:flex;flex-direction:column;gap:4px;min-width:0">
+                <span style="font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:{{ c.numFg }}">{{ c.label }}</span>
+                <span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:oklch(0.45 0.13 255);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.inc }}</span>
+                <span style="font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:#15171a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.exp }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLgStats }}">
+        <div style="display:grid;grid-template-columns:{{ halfCols }};gap:18px">
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:18px">
+            <div style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">카테고리별 지출</div>
+            <div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap">
+              <div style="width:180px;height:180px;border-radius:50%;background:{{ donut }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div style="width:112px;height:112px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:12px;color:#5b6068">총 지출</span><span style="font:400 16px YeogiOttaeJalnan,Pretendard,sans-serif">{{ expenseShort }}</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;flex:1;min-width:180px">
+                <sc-for list="{{ catShare }}" as="cs">
+                  <div style="display:flex;gap:10px;align-items:center;font-size:14px"><span style="width:10px;height:10px;border-radius:3px;background:{{ cs.color }}"></span><span style="flex:1;font-weight:600">{{ cs.name }}</span><span style="color:#5b6068">{{ cs.amtTxt }}</span><span style="font-weight:700;width:40px;text-align:right">{{ cs.pct }}%</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">월별 지출 추이</span><span style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:{{ momColor }}">{{ momTxt }}</span></div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:end;height:200px">
+              <sc-for list="{{ trend }}" as="tr">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end">
+                  <span style="font:600 11px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ tr.v }}</span>
+                  <div style="width:100%;max-width:44px;height:{{ tr.h }}%;border-radius:10px 10px 4px 4px;background:{{ tr.bg }}"></div>
+                  <span style="font:600 12px YeogiOttaeJalnan,Pretendard,sans-serif">{{ tr.m }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLgBudget }}">
+        <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">10월 카테고리 예산</span><span style="font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">전체 {{ expenseTxt }} / {{ budgetTotalTxt }}원 · {{ budgetPct }}%</span></div>
+          <sc-for list="{{ budgets }}" as="b" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:6px 0">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+                <span style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif;display:flex;gap:8px;align-items:center">{{ b.name }}<sc-if value="{{ b.badge }}"><span style="font:700 11px YeogiOttaeJalnan,Pretendard,sans-serif;padding:3px 8px;border-radius:999px;background:{{ b.badgeBg }};color:{{ b.txt }}">{{ b.badge }}</span></sc-if></span>
+                <span style="font-size:14px"><span style="font-weight:700;color:{{ b.txt }}">{{ b.pct }}%</span> <span style="color:#5b6068">· {{ b.spentTxt }} / {{ b.amtTxt }}원 · {{ b.leftTxt }}</span></span>
+              </div>
+              <div style="height:12px;border-radius:6px;background:#f1f2f4;overflow:hidden"><div style="width:{{ b.w }}%;height:12px;background:{{ b.bar }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLgAssets }}">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div style="background:#15171a;color:#fff;border-radius:28px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">순자산</span><span style="font:800 32px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em">{{ netWorthTxt }}원</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
+            <sc-for list="{{ accounts }}" as="a" hint-placeholder-count="4">
+              <div style="background:#fff;border-radius:24px;padding:22px 24px;display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 16px YeogiOttaeJalnan,Pretendard,sans-serif">{{ a.name }}</span><span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;padding:4px 10px;border-radius:999px;background:{{ a.bg }};color:{{ a.fg }}">{{ a.type }}</span></div>
+                <span style="font:400 24px YeogiOttaeJalnan,Pretendard,sans-serif;letter-spacing:-.02em;color:{{ a.amtColor }}">{{ a.balTxt }}원</span>
+                <span style="font-size:13px;color:#5b6068">{{ a.note }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLgRec }}">
+        <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:8px"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">고정지출 · 반복거래</span><span style="font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">월 고정지출 {{ recTotalTxt }}원</span></div>
+          <sc-for list="{{ recurring }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #f1f2f4;opacity:{{ r.op }}">
+              <span style="width:40px;height:40px;border-radius:12px;background:{{ r.bg }};color:{{ r.fg }};display:flex;align-items:center;justify-content:center;font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;flex-shrink:0">{{ r.day }}일</span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ r.title }}</span><span style="font-size:13px;color:#5b6068">매월 {{ r.day }}일 · {{ r.cat }} · {{ r.account }} · 다음 {{ r.next }}</span></div>
+              <span style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;color:{{ r.amtColor }}">{{ r.amtTxt }}</span>
+              <div onClick="{{ r.flip }}" style="width:44px;height:26px;border-radius:13px;background:{{ r.track }};padding:3px;cursor:pointer;flex-shrink:0;display:flex;justify-content:{{ r.jc }}"><div style="width:20px;height:20px;border-radius:50%;background:#fff"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isSearch }}">
+    <div style="padding:0 28px;display:flex;flex-direction:column;gap:18px;max-width:900px;width:100%;margin:0 auto">
+      <input autoFocus="{{ true }}" value="{{ q }}" onChange="{{ setQ }}" placeholder="일정, 할일, 거래를 한 번에 검색 — 예) 요가, 식비, 보고서" style="border:0;border-radius:20px;padding:18px 22px;font:500 18px YeogiOttaeJalnan,Pretendard,sans-serif;background:#fff;color:#15171a;outline:none;width:100%">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ searchFilters }}" as="f"><button onClick="{{ f.go }}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:999px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }} <span style="opacity:.6">{{ f.n }}</span></button></sc-for>
+      </div>
+      <sc-if value="{{ qEmpty }}">
+        <div style="background:#fff;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px">
+          <span style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif">이렇게 찾아보세요</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ suggestions }}" as="sg"><button onClick="{{ sg.go }}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:#f1f2f4;color:#15171a">{{ sg.t }}</button></sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasResults }}">
+        <div style="background:#fff;border-radius:24px;padding:8px 24px;display:flex;flex-direction:column">
+          <sc-for list="{{ results }}" as="r">
+            <div onClick="{{ r.go }}" style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #f1f2f4;cursor:pointer">
+              <span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;padding:4px 10px;border-radius:999px;background:{{ r.bg }};color:{{ r.fg }};flex-shrink:0">{{ r.kind }}</span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ r.title }}</span><span style="font-size:13px;color:#5b6068">{{ r.sub }}</span></div>
+              <span style="font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap">{{ r.right }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noResults }}"><div style="font-size:15px;color:#5b6068;padding:12px 4px">"{{ q }}"에 해당하는 항목이 없어요.</div></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isSettings }}">
+    <div style="display:grid;grid-template-columns:{{ setCols }};gap:18px;padding:0 28px">
+      <div style="background:#fff;border-radius:24px;padding:10px;display:flex;flex-direction:{{ setNavDir }};gap:2px;align-self:start;overflow-x:auto">
+        <sc-for list="{{ setNav }}" as="sn"><button onClick="{{ sn.go }}" style="border:0;cursor:pointer;text-align:left;padding:12px 14px;border-radius:14px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;white-space:nowrap;background:{{ sn.bg }};color:{{ sn.fg }}">{{ sn.label }}</button></sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+
+        <sc-if value="{{ isSetInt }}">
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">Google Calendar</span><span style="font-size:13px;color:#5b6068">{{ gcalStatus }}</span></div>
+              <button onClick="{{ toggleGcal }}" style="border:0;cursor:pointer;border-radius:12px;padding:10px 16px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ gcalBtnBg }};color:{{ gcalBtnFg }}">{{ gcalBtn }}</button>
+            </div>
+            <sc-if value="{{ gcalOn }}">
+              <div style="display:flex;flex-direction:column;gap:2px;border-top:1px solid #f1f2f4;padding-top:10px">
+                <span style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068;padding-bottom:4px">동기화할 캘린더</span>
+                <sc-for list="{{ gcals }}" as="g">
+                  <div style="display:flex;gap:12px;align-items:center;padding:10px 0">
+                    <span style="width:12px;height:12px;border-radius:4px;background:{{ g.color }}"></span>
+                    <span style="flex:1;font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ g.name }}</span>
+                    <span style="font-size:13px;color:#5b6068">{{ g.count }}개 일정</span>
+                    <div onClick="{{ g.flip }}" style="width:44px;height:26px;border-radius:13px;background:{{ g.track }};padding:3px;cursor:pointer;flex-shrink:0;display:flex;justify-content:{{ g.jc }}"><div style="width:20px;height:20px;border-radius:50%;background:#fff"></div></div>
+                  </div>
+                </sc-for>
+                <span style="font-size:13px;color:#5b6068;padding-top:6px">양방향 동기화 · 충돌 시 최종 수정 우선 · 변경 감지 Webhook + 15분 폴링</span>
+              </div>
+            </sc-if>
+          </div>
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">날씨 위치</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ cities }}" as="ct"><button onClick="{{ ct.go }}" style="white-space:nowrap;flex-shrink:0;cursor:pointer;padding:9px 16px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;border:1.5px solid {{ ct.bd }};background:{{ ct.bg }};color:{{ ct.fg }}">{{ ct.name }}</button></sc-for>
+            </div>
+            <span style="font-size:13px;color:#5b6068">Open-Meteo · 30분 캐시 · 브라우저 위치 사용은 화면 설정에서 허용할 수 있어요</span>
+          </div>
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">Claude MCP 토큰</span><span style="font-size:13px;color:#5b6068">calendar-mcp · todo-mcp · ledger-mcp 공통</span></div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <sc-for list="{{ scopeOpts }}" as="so"><button onClick="{{ so.go }}" style="white-space:nowrap;flex-shrink:0;cursor:pointer;padding:8px 12px;border-radius:10px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;border:1.5px solid {{ so.bd }};background:#fff;color:#15171a">{{ so.label }}</button></sc-for>
+                <button onClick="{{ issueToken }}" style="white-space:nowrap;flex-shrink:0;border:0;cursor:pointer;border-radius:12px;padding:10px 16px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:#15171a;color:#fff">새 토큰 발급</button>
+              </div>
+            </div>
+            <sc-if value="{{ newToken }}">
+              <div style="background:oklch(0.95 0.035 155);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+                <span style="font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:oklch(0.4 0.13 155)">지금 한 번만 표시돼요. 복사해서 Claude 커넥터에 붙여넣으세요.</span>
+                <span style="font:500 14px YeogiOttaeJalnan,Pretendard,sans-serif;word-break:break-all">{{ newToken }}</span>
+              </div>
+            </sc-if>
+            <sc-for list="{{ tokens }}" as="tk" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #f1f2f4;flex-wrap:wrap">
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:160px"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ tk.name }}</span><span style="font:500 12px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ tk.prefix }}••••  · 마지막 사용 {{ tk.last }}</span></div>
+                <span style="font:700 12px YeogiOttaeJalnan,Pretendard,sans-serif;padding:4px 10px;border-radius:999px;background:#f1f2f4">{{ tk.scope }}</span>
+                <button onClick="{{ tk.revoke }}" style="border:0;cursor:pointer;border-radius:10px;padding:8px 12px;font:700 13px YeogiOttaeJalnan,Pretendard,sans-serif;background:oklch(0.95 0.04 25);color:oklch(0.45 0.17 25)">폐기</button>
+              </div>
+            </sc-for>
+            <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid #f1f2f4;padding-top:12px">
+              <span style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">최근 호출</span>
+              <sc-for list="{{ mcpLogs }}" as="lg"><div style="display:flex;gap:12px;font:500 13px YeogiOttaeJalnan,Pretendard,sans-serif"><span style="color:#5b6068;width:48px">{{ lg.t }}</span><span style="flex:1">{{ lg.tool }}</span><span style="color:{{ lg.c }}">{{ lg.r }}</span></div></sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSetCat }}">
+          <sc-for list="{{ catGroups }}" as="cg">
+            <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px">
+              <span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">{{ cg.title }}</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{ cg.items }}" as="ci"><span style="display:flex;gap:8px;align-items:center;padding:9px 14px;border-radius:999px;background:{{ ci.bg }};color:{{ ci.fg }};font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif"><span style="width:10px;height:10px;border-radius:50%;background:{{ ci.dot }}"></span>{{ ci.name }}</span></sc-for>
+                <span style="padding:9px 14px;border-radius:999px;border:1.5px dashed #c9cdd3;color:#5b6068;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif">+ 추가</span>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <sc-if value="{{ isSetNoti }}">
+          <div style="background:#fff;border-radius:28px;padding:12px 24px;display:flex;flex-direction:column">
+            <sc-for list="{{ notis }}" as="n">
+              <div style="display:flex;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid #f1f2f4">
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:600 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ n.label }}</span><span style="font-size:13px;color:#5b6068">{{ n.desc }}</span></div>
+                <div onClick="{{ n.flip }}" style="width:44px;height:26px;border-radius:13px;background:{{ n.track }};padding:3px;cursor:pointer;flex-shrink:0;display:flex;justify-content:{{ n.jc }}"><div style="width:20px;height:20px;border-radius:50%;background:#fff"></div></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSetView }}">
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:20px">
+            <sc-for list="{{ viewOpts }}" as="vo">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <span style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif">{{ vo.label }}</span>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ vo.opts }}" as="o"><button onClick="{{ o.go }}" style="cursor:pointer;padding:9px 16px;border-radius:12px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+                </div>
+              </div>
+            </sc-for>
+            <span style="font-size:13px;color:#5b6068">시간대 Asia/Seoul · 모든 시각은 UTC로 저장되고 표시할 때 변환돼요</span>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSetBackup }}">
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">데이터 내보내기</span>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ exportJson }}" style="border:0;cursor:pointer;border-radius:12px;padding:12px 18px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:#15171a;color:#fff">전체 JSON 내려받기</button>
+              <button onClick="{{ exportCsv }}" style="border:0;cursor:pointer;border-radius:12px;padding:12px 18px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:#f1f2f4;color:#15171a">거래내역 CSV</button>
+            </div>
+            <span style="font-size:13px;color:#5b6068">일정 {{ evCount }}개 · 할일 {{ tdCount }}개 · 거래 {{ txCount }}건 · Supabase 자동 백업은 매일 새벽 4시</span>
+          </div>
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:10px">
+            <span style="font:400 18px YeogiOttaeJalnan,Pretendard,sans-serif">CSV 가져오기</span>
+            <div style="border:1.5px dashed #c9cdd3;border-radius:16px;padding:28px;text-align:center;font:500 14px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">거래내역 CSV 파일을 여기에 놓으세요 · 날짜, 내용, 금액, 카테고리</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSetProfile }}">
+          <div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;gap:16px;align-items:center">
+              <span style="width:64px;height:64px;border-radius:50%;background:#d7dbe1;display:flex;align-items:center;justify-content:center;font:800 22px YeogiOttaeJalnan,Pretendard,sans-serif">민</span>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font:400 20px YeogiOttaeJalnan,Pretendard,sans-serif">김민지</span><span style="font-size:14px;color:#5b6068">minji@gmail.com · Google 로그인</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+              <div style="background:#f5f6f8;border-radius:16px;padding:14px 16px"><div style="font-size:13px;color:#5b6068">시간대</div><div style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif">Asia/Seoul (UTC+9)</div></div>
+              <div style="background:#f5f6f8;border-radius:16px;padding:14px 16px"><div style="font-size:13px;color:#5b6068">통화</div><div style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif">KRW (원)</div></div>
+              <div style="background:#f5f6f8;border-radius:16px;padding:14px 16px"><div style="font-size:13px;color:#5b6068">가입일</div><div style="font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif">2026년 10월 1일</div></div>
+            </div>
+            <div style="display:flex;gap:10px"><button style="border:0;cursor:pointer;border-radius:12px;padding:12px 18px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:#f1f2f4;color:#15171a">로그아웃</button></div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <button onClick="{{ openQA }}" style="position:fixed;right:28px;bottom:28px;height:56px;padding:0 22px;border:0;border-radius:999px;background:#15171a;color:#fff;display:flex;align-items:center;gap:10px;font:700 15px YeogiOttaeJalnan,Pretendard,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.2);cursor:pointer;z-index:5"><span style="font-size:22px;font-weight:400">+</span>빠른 추가<span style="font:500 12px YeogiOttaeJalnan,Pretendard,sans-serif;opacity:.6">N</span></button>
+
+  <sc-if value="{{ qaOpen }}">
+    <div onClick="{{ closeQA }}" style="position:fixed;inset:0;background:rgba(21,23,26,.35);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:28px;padding:28px;width:100%;max-width:440px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="font:400 20px YeogiOttaeJalnan,Pretendard,sans-serif">빠른 추가</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:#f1f2f4;padding:4px;border-radius:999px">
+          <sc-for list="{{ qaTypes }}" as="q" hint-placeholder-count="3">
+            <button onClick="{{ q.go }}" style="border:0;cursor:pointer;padding:9px;border-radius:999px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;background:{{ q.bg }};color:{{ q.fg }}">{{ q.label }}</button>
+          </sc-for>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">{{ qaTitleLabel }}
+          <input autoFocus="{{ true }}" value="{{ qaTitle }}" onChange="{{ setTitle }}" onKeyDown="{{ qaKey }}" placeholder="{{ qaPh }}" style="border:1.5px solid #dfe2e6;border-radius:14px;padding:12px 14px;font:500 16px YeogiOttaeJalnan,Pretendard,sans-serif;color:#15171a;outline:none">
+        </label>
+        <sc-if value="{{ qaIsEvent }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">날짜 (10월)<input type="number" min="1" max="31" value="{{ qaDay }}" onChange="{{ setDay }}" style="border:1.5px solid #dfe2e6;border-radius:14px;padding:12px 14px;font:500 16px YeogiOttaeJalnan,Pretendard,sans-serif"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">시간<input type="time" value="{{ qaTime }}" onChange="{{ setTime }}" style="border:1.5px solid #dfe2e6;border-radius:14px;padding:12px 14px;font:500 16px YeogiOttaeJalnan,Pretendard,sans-serif"></label>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <sc-for list="{{ evCatOpts }}" as="o"><button onClick="{{ o.go }}" style="cursor:pointer;padding:7px 12px;border-radius:999px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ qaIsTodo }}">
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ prioOpts }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.go }}" style="flex:1;cursor:pointer;padding:10px;border-radius:12px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;border:1.5px solid {{ o.bd }};background:#fff;color:#15171a">우선순위 {{ o.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ qaIsTx }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">금액 (원)<input inputMode="numeric" value="{{ qaAmtTxt }}" onChange="{{ setAmt }}" placeholder="12,000" style="border:1.5px solid #dfe2e6;border-radius:14px;padding:12px 14px;font:500 16px YeogiOttaeJalnan,Pretendard,sans-serif"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:#5b6068">카테고리
+              <select value="{{ qaCat }}" onChange="{{ setCat }}" style="border:1.5px solid #dfe2e6;border-radius:14px;padding:12px 14px;font:500 16px YeogiOttaeJalnan,Pretendard,sans-serif;background:#fff">
+                <sc-for list="{{ catNames }}" as="cn"><option value="{{ cn }}">{{ cn }}</option></sc-for>
+              </select>
+            </label>
+          </div>
+        </sc-if>
+        <sc-if value="{{ qaErr }}"><div style="font:600 13px YeogiOttaeJalnan,Pretendard,sans-serif;color:oklch(0.48 0.17 25)">{{ qaErr }}</div></sc-if>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onClick="{{ closeQA }}" style="border:0;background:#f1f2f4;border-radius:14px;padding:12px 18px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">취소</button>
+          <button onClick="{{ saveQA }}" style="border:0;background:#15171a;color:#fff;border-radius:14px;padding:12px 22px;font:700 14px YeogiOttaeJalnan,Pretendard,sans-serif;cursor:pointer">저장</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}">
+    <div style="position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#15171a;color:#fff;padding:12px 20px;border-radius:999px;font:600 14px YeogiOttaeJalnan,Pretendard,sans-serif;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.2);white-space:nowrap">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const C = h => `oklch(0.62 0.13 ${h})`, CL = h => `oklch(0.95 0.035 ${h})`, CD = h => `oklch(0.42 0.13 ${h})`;
+const EVC = { 업무: 255, 약속: 55, 건강: 155, 운동: 320, 기념: 20 };
+const TXC = { 식비: 55, 교통: 255, 쇼핑: 320, 문화: 20, 생활: 155, 주거: 285, 통신: 200, 급여: 255 };
+const BUDGET = { 식비: 550000, 교통: 150000, 쇼핑: 300000, 문화: 130000, 생활: 450000 };
+const BASE = { 식비: 380000, 교통: 90000, 쇼핑: 180000, 문화: 120000, 생활: 340000 };
+const DAILY_W = [6, 9, 4, 11, 7, 5, 13, 6, 8, 10, 4, 9, 8];
+const WX = { 14: ['맑음', 10, 21, 11], 15: ['흐림', 20, 19, 10], 16: ['비', 70, 15, 9], 17: ['흐림', 30, 14, 8], 18: ['맑음', 0, 16, 7], 19: ['맑음', 10, 17, 9], 20: ['비', 60, 13, 6] };
+const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+const dowIdx = d => (d + 3) % 7;
+const dowOf = d => DOW[dowIdx(d)];
+const won = n => n.toLocaleString('ko-KR');
+const pill = (on, onBg = '#15171a') => ({ bg: on ? onBg : 'transparent', fg: on ? '#fff' : '#5b6068' });
+const sw = on => ({ track: on ? C(155) : '#d7dbe1', jc: on ? 'flex-end' : 'flex-start' });
+let uid = 100;
+
+class Component extends DCLogic {
+  state = {
+    tab: 'home', w: typeof window !== 'undefined' ? window.innerWidth : 1280, selDay: 14,
+    calView: 'month', todoView: 'list', todoFilter: 'today', lgView: 'tx', txFilter: 'all', setView: 'int',
+    ovTodo: true, ovBill: true, evCat: '전체', q: '', qType: '전체',
+    weekStart: 0, theme: '라이트', city: '서울', gcal: true, scope: 'read · write', newToken: '',
+    gcals: [{ name: '내 캘린더', h: 255, on: true }, { name: '회사', h: 55, on: true }, { name: '대한민국 공휴일', h: 20, on: true }, { name: '생일', h: 320, on: false }],
+    tokens: [{ id: 1, name: 'Claude Desktop', prefix: 'mcp_7f3a', scope: 'read · write', last: '오늘 12:41' }, { id: 2, name: 'Claude Code', prefix: 'mcp_c21e', scope: 'read', last: '어제' }],
+    notis: { ev: true, todo: true, b80: true, b100: true, rain: false, mail: false },
+    recurring: [
+      { id: 1, title: '10월 급여', day: 10, cat: '급여', amount: 3200000, type: 'income', account: '급여통장', on: true },
+      { id: 2, title: '넷플릭스', day: 13, cat: '문화', amount: 17000, type: 'expense', account: '신용카드', on: true },
+      { id: 3, title: '휴대폰 요금', day: 20, cat: '통신', amount: 59000, type: 'expense', account: '급여통장', on: true },
+      { id: 4, title: '월세', day: 25, cat: '주거', amount: 650000, type: 'expense', account: '급여통장', on: true },
+      { id: 5, title: '헬스장', day: 28, cat: '생활', amount: 79000, type: 'expense', account: '신용카드', on: false },
+    ],
+    qaOpen: false, qaType: 'event', qaTitle: '', qaDay: 14, qaTime: '10:00', qaPrio: '중', qaAmt: '', qaCat: '식비', qaEvCat: '업무', qaErr: '', toast: '',
+    events: [
+      { id: 1, day: 2, time: '19:00', title: '가족 저녁', place: '본가', cat: '약속', src: 'APP' },
+      { id: 2, day: 9, time: '', title: '한글날', place: '공휴일', cat: '기념', src: 'GCAL' },
+      { id: 3, day: 14, time: '09:30', title: '팀 주간회의', place: '본사 3층 회의실', cat: '업무', src: 'GCAL' },
+      { id: 4, day: 14, time: '12:30', title: '점심 — 지수', place: '을지로 진주회관', cat: '약속', src: 'APP' },
+      { id: 5, day: 14, time: '15:00', title: '치과 정기검진', place: '강남 서울바른치과', cat: '건강', src: 'MCP' },
+      { id: 6, day: 14, time: '19:30', title: '요가 클래스', place: '성수 스튜디오', cat: '운동', src: 'GCAL' },
+      { id: 7, day: 16, time: '14:00', title: '프로젝트 마감 회의', place: '온라인', cat: '업무', src: 'GCAL' },
+      { id: 8, day: 17, time: '12:00', title: '친구 결혼식', place: '여의도 더파티움', cat: '약속', src: 'APP' },
+      { id: 9, day: 21, time: '08:00', title: '부산 출장', place: 'KTX 서울역', cat: '업무', src: 'GCAL' },
+      { id: 10, day: 24, time: '18:30', title: '동창 모임', place: '연남동', cat: '약속', src: 'APP' },
+      { id: 11, day: 28, time: '08:30', title: '건강검진', place: '종합검진센터', cat: '건강', src: 'APP' },
+      { id: 12, day: 21, time: '19:30', title: '요가 클래스', place: '성수 스튜디오', cat: '운동', src: 'GCAL' },
+      { id: 13, day: 12, time: '10:00', title: '디자인 리뷰', place: '본사 5층', cat: '업무', src: 'GCAL' },
+      { id: 14, day: 13, time: '18:00', title: '러닝 크루', place: '한강 뚝섬', cat: '운동', src: 'APP' },
+      { id: 15, day: 15, time: '11:00', title: '분기 보고 미팅', place: '본사 3층', cat: '업무', src: 'GCAL' },
+      { id: 16, day: 18, time: '10:00', title: '브런치 — 수빈', place: '한남동', cat: '약속', src: 'APP' },
+    ],
+    todos: [
+      { id: 1, title: '관리비 납부', prio: '중', project: '생활', due: 13, done: false, doing: false },
+      { id: 2, title: '분기 보고서 초안 작성', prio: '상', project: '업무', due: 14, done: false, doing: true },
+      { id: 3, title: '택배 반품 신청', prio: '하', project: '생활', due: 14, done: false, doing: false },
+      { id: 4, title: '세탁소 코트 찾기', prio: '하', project: '생활', due: 14, done: true, doing: false },
+      { id: 5, title: '마감 회의 자료 준비', prio: '상', project: '업무', due: 16, done: false, doing: true },
+      { id: 6, title: '결혼식 축의금 준비', prio: '중', project: '생활', due: 17, done: false, doing: false },
+      { id: 7, title: '출장 숙소 예약', prio: '중', project: '업무', due: 18, done: true, doing: false },
+      { id: 8, title: '독서 모임 책 읽기', prio: '하', project: '개인', due: null, done: false, doing: false },
+    ],
+    txs: [
+      { id: 1, date: 14, title: '점심 진주회관', cat: '식비', amount: 12000, type: 'expense', account: '신용카드' },
+      { id: 2, date: 14, title: '지하철', cat: '교통', amount: 1550, type: 'expense', account: '교통카드' },
+      { id: 3, date: 13, title: '생활용품 주문', cat: '생활', amount: 32400, type: 'expense', account: '신용카드' },
+      { id: 4, date: 13, title: '넷플릭스 (고정)', cat: '문화', amount: 17000, type: 'expense', account: '신용카드' },
+      { id: 5, date: 12, title: '장보기', cat: '식비', amount: 58200, type: 'expense', account: '체크카드' },
+      { id: 6, date: 10, title: '10월 급여', cat: '급여', amount: 3200000, type: 'income', account: '급여통장' },
+      { id: 7, date: 9, title: '영화 관람', cat: '문화', amount: 28000, type: 'expense', account: '신용카드' },
+      { id: 8, date: 7, title: '운동화', cat: '쇼핑', amount: 89000, type: 'expense', account: '신용카드' },
+      { id: 9, date: 5, title: '택시', cat: '교통', amount: 14300, type: 'expense', account: '신용카드' },
+      { id: 10, date: 3, title: '중고거래 판매', cat: '급여', amount: 45000, type: 'income', account: '급여통장' },
+    ],
+  };
+  componentDidMount() {
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    this.onKey = e => {
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (e.key === 'Escape' && this.state.qaOpen) this.setState({ qaOpen: false });
+      else if ((e.key === 'n' || e.key === 'N') && !['input', 'select', 'textarea'].includes(tag) && !this.state.qaOpen) { e.preventDefault(); this.open('event'); }
+    };
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); clearTimeout(this.tt); }
+  open(type, extra = {}) { this.setState({ qaOpen: true, qaType: type, qaTitle: '', qaAmt: '', qaErr: '', qaDay: this.state.selDay, ...extra }); }
+  flash(msg) { clearTimeout(this.tt); this.setState({ toast: msg }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  patchTodo(id, p) { this.setState(s => ({ todos: s.todos.map(t => t.id === id ? { ...t, ...p } : t) })); }
+  download(name, text, mime) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000); this.flash(`${name} 내려받기를 시작했어요`);
+  }
+  save() {
+    const s = this.state, title = s.qaTitle.trim();
+    if (!title) return this.setState({ qaErr: s.qaType === 'tx' ? '내용을 입력하세요.' : '제목을 입력하세요.' });
+    if (s.qaType === 'event') {
+      const day = Math.min(31, Math.max(1, parseInt(s.qaDay) || 14));
+      this.setState({ events: [...s.events, { id: uid++, day, time: s.qaTime, title, place: '직접 입력', cat: s.qaEvCat, src: 'APP' }], qaOpen: false, selDay: day });
+      this.flash(`10월 ${day}일 일정을 추가했어요`);
+    } else if (s.qaType === 'todo') {
+      this.setState({ todos: [{ id: uid++, title, prio: s.qaPrio, project: '개인', due: 14, done: false, doing: false }, ...s.todos], qaOpen: false });
+      this.flash('오늘 할일에 추가했어요');
+    } else {
+      const amount = parseInt(String(s.qaAmt).replace(/\D/g, '')) || 0;
+      if (!amount) return this.setState({ qaErr: '금액을 입력하세요.' });
+      this.setState({ txs: [{ id: uid++, date: 14, title, cat: s.qaCat, amount, type: 'expense', account: '신용카드' }, ...s.txs], qaOpen: false });
+      this.flash(`${s.qaCat} ${won(amount)}원을 기록했어요`);
+    }
+  }
+  renderVals() {
+    const s = this.state, wide = s.w >= 1180, mid = s.w >= 820;
+    const go = p => () => this.setState(p);
+    const tabs = [['home', '홈'], ['cal', '일정'], ['todo', '할일'], ['ledger', '가계부']].map(([k, label]) => ({ label, ...pill(s.tab === k), go: go({ tab: k }) }));
+    const subDefs = {
+      cal: ['calView', [['month', '월간'], ['week', '주간'], ['list', '일정 목록']]],
+      todo: ['todoView', [['list', '목록'], ['board', '보드']]],
+      ledger: ['lgView', [['tx', '거래내역'], ['cal', '월간 달력'], ['stats', '통계'], ['budget', '예산'], ['assets', '자산·계좌'], ['rec', '고정지출']]],
+    };
+    const sd = subDefs[s.tab];
+    const subTabs = sd ? sd[1].map(([k, label]) => { const on = s[sd[0]] === k; return { label, bg: on ? '#fff' : 'transparent', fg: on ? '#15171a' : '#5b6068', bd: on ? '#15171a' : '#d7dbe1', go: go({ [sd[0]]: k }) }; }) : [];
+
+    const evDecor = e => ({ ...e, color: C(EVC[e.cat]), timeTxt: e.time || '종일' });
+    const sortEv = (a, b) => (a.time || '00').localeCompare(b.time || '00');
+    const todayEvents = s.events.filter(e => e.day === 14).sort(sortEv).map(evDecor);
+    const prioC = { 상: 25, 중: 55, 하: 255 };
+    const status = t => t.done ? 'done' : t.doing ? 'doing' : 'todo';
+    const stLabel = { todo: '할 일', doing: '진행 중', done: '완료' };
+    const decT = t => ({ ...t, late: !t.done && t.due !== null && t.due < 14, fill: t.done ? C(155) : 'transparent', deco: t.done ? 'line-through' : 'none', op: t.done ? 0.45 : 1,
+      dueTxt: t.due === null ? '마감 없음' : t.due === 14 ? '오늘 마감' : `10월 ${t.due}일`, statusTxt: stLabel[status(t)], pBg: CL(prioC[t.prio]), pFg: CD(prioC[t.prio]),
+      toggle: () => this.patchTodo(t.id, { done: !t.done, doing: false }) });
+    const isToday = t => t.due !== null && t.due <= 14 && (!t.done || t.due === 14);
+    const todayTodos = s.todos.filter(isToday).map(decT);
+    const filt = { today: isToday, all: t => !t.done, done: t => t.done };
+    const todoFilters = [['today', '오늘'], ['all', '진행 중'], ['done', '완료']].map(([k, label]) => ({ label, n: s.todos.filter(filt[k]).length, ...pill(s.todoFilter === k), go: go({ todoFilter: k }) }));
+    const todoList = s.todos.filter(filt[s.todoFilter]).sort((a, b) => (a.due ?? 99) - (b.due ?? 99)).map(decT);
+    const projects = ['업무', '생활', '개인'].map(name => { const l = s.todos.filter(t => t.project === name), d = l.filter(t => t.done).length; return { name, total: l.length, done: d, pct: l.length ? Math.round(d / l.length * 100) : 0 }; });
+    const order = ['todo', 'doing', 'done'], stP = { todo: { done: false, doing: false }, doing: { done: false, doing: true }, done: { done: true, doing: false } };
+    const board = order.map((k, i) => { const items = s.todos.filter(t => status(t) === k).sort((a, b) => (a.due ?? 99) - (b.due ?? 99)).map(t => ({ ...decT(t),
+      canBack: i > 0, canFwd: i < 2, backLabel: i > 0 ? stLabel[order[i - 1]] : '', fwdLabel: i < 2 ? stLabel[order[i + 1]] : '',
+      back: () => i > 0 && this.patchTodo(t.id, stP[order[i - 1]]), fwd: () => i < 2 && this.patchTodo(t.id, stP[order[i + 1]]) }));
+      return { label: stLabel[k], n: items.length, items, dot: [C(255), C(55), C(155)][i] }; });
+
+    // ledger
+    const spent = { ...BASE };
+    s.txs.forEach(x => { if (x.type === 'expense') spent[x.cat] = (spent[x.cat] || 0) + x.amount; });
+    const expense = Object.values(spent).reduce((a, b) => a + b, 0);
+    const income = s.txs.filter(x => x.type === 'income').reduce((a, x) => a + x.amount, 0);
+    const budgetTotal = Object.values(BUDGET).reduce((a, b) => a + b, 0);
+    const budgetPct = Math.round(Object.keys(BUDGET).reduce((a, k) => a + spent[k], 0) / budgetTotal * 100);
+    const budgets = Object.keys(BUDGET).map(name => { const pct = Math.round(spent[name] / BUDGET[name] * 100); const h = pct >= 100 ? 25 : pct >= 80 ? 55 : 155; const left = BUDGET[name] - spent[name];
+      return { name, pct, w: Math.min(pct, 100), spentTxt: won(spent[name]), amtTxt: won(BUDGET[name]), bar: C(h), txt: pct >= 80 ? CD(h) : '#15171a',
+        badge: pct >= 100 ? '초과' : pct >= 80 ? '주의' : '', badgeBg: CL(h), leftTxt: left >= 0 ? `${won(left)}원 남음` : `${won(-left)}원 초과` }; });
+    const warnBudget = budgets.filter(b => b.pct >= 80).sort((a, b) => b.pct - a.pct)[0] || null;
+    const txF = { all: () => true, income: x => x.type === 'income', expense: x => x.type === 'expense' };
+    const txFilters = [['all', '전체'], ['income', '수입'], ['expense', '지출']].map(([k, label]) => ({ label, ...pill(s.txFilter === k), go: go({ txFilter: k }) }));
+    const shownTx = s.txs.filter(txF[s.txFilter]).sort((a, b) => b.date - a.date);
+    const txSum = shownTx.reduce((a, x) => a + (x.type === 'income' ? x.amount : -x.amount), 0);
+    const txList = shownTx.map(x => ({ ...x, cat1: x.cat[0], bg: CL(TXC[x.cat]), fg: CD(TXC[x.cat]), amtTxt: (x.type === 'income' ? '+' : '−') + won(x.amount) + '원', amtColor: x.type === 'income' ? CD(255) : '#15171a' }));
+    const baseTotal = Object.values(BASE).reduce((a, b) => a + b, 0);
+    const wSum = DAILY_W.reduce((a, b) => a + b, 0);
+    const dayExp = {}, dayInc = {};
+    DAILY_W.forEach((wt, i) => { dayExp[i + 1] = Math.round(baseTotal * wt / wSum / 100) * 100; });
+    s.txs.forEach(x => { if (x.type === 'expense') dayExp[x.date] = (dayExp[x.date] || 0) + x.amount; else dayInc[x.date] = (dayInc[x.date] || 0) + x.amount; });
+    const catShareRaw = Object.keys(spent).map(name => ({ name, amt: spent[name] })).sort((a, b) => b.amt - a.amt);
+    let acc = 0; const stops = [];
+    const catShare = catShareRaw.map(c => { const pct = Math.round(c.amt / expense * 100); const color = C(TXC[c.name]); stops.push(`${color} ${acc}% ${acc + c.amt / expense * 100}%`); acc += c.amt / expense * 100; return { ...c, pct, color, amtTxt: won(c.amt) + '원' }; });
+    const trendRaw = [['5월', 1420000], ['6월', 1310000], ['7월', 1550000], ['8월', 1380000], ['9월', 1470000], ['10월', expense]];
+    const tMax = Math.max(...trendRaw.map(t => t[1]));
+    const trend = trendRaw.map(([m, v], i) => ({ m, v: (v / 10000).toFixed(0) + '만', h: Math.round(v / tMax * 80), bg: i === 5 ? C(55) : '#d7dbe1' }));
+    const mom = Math.round((expense - 1470000) / 1470000 * 100);
+    const accountsRaw = [
+      { name: '급여통장', type: '통장', bal: 2184300 + income - 3245000, h: 255, note: '체크카드 연결 · 월세·통신비 자동이체' },
+      { name: '비상금 통장', type: '통장', bal: 5000000, h: 255, note: '연 3.1% 파킹통장' },
+      { name: '현금', type: '현금', bal: 85000, h: 155, note: '지갑' },
+      { name: '신용카드', type: '카드', bal: -482600 - s.txs.filter(x => x.id >= 100).reduce((a, x) => a + x.amount, 0), h: 55, note: '11월 15일 결제 예정' },
+    ];
+    const accounts = accountsRaw.map(a => ({ ...a, balTxt: (a.bal < 0 ? '−' : '') + won(Math.abs(a.bal)), bg: CL(a.h), fg: CD(a.h), amtColor: a.bal < 0 ? CD(25) : '#15171a' }));
+    const recurring = s.recurring.map(r => ({ ...r, ...sw(r.on), op: r.on ? 1 : 0.5, bg: CL(TXC[r.cat]), fg: CD(TXC[r.cat]), next: r.day > 14 ? `10월 ${r.day}일` : `11월 ${r.day}일`,
+      amtTxt: (r.type === 'income' ? '+' : '−') + won(r.amount) + '원', amtColor: r.type === 'income' ? CD(255) : '#15171a',
+      flip: () => this.setState(st => ({ recurring: st.recurring.map(x => x.id === r.id ? { ...x, on: !x.on } : x) })) }));
+    const recTotal = s.recurring.filter(r => r.on && r.type === 'expense').reduce((a, r) => a + r.amount, 0);
+
+    // calendar
+    const lead = (dowIdx(1) - s.weekStart + 7) % 7;
+    const blank = { label: '', wx: '', chips: [], bg: 'transparent', ol: 'none', cur: 'default', numBg: 'transparent', numFg: '#15171a', pick: null, inc: '', exp: '' };
+    const cells = [], lgCells = [];
+    for (let i = 0; i < lead; i++) { cells.push(blank); lgCells.push(blank); }
+    const dayColor = d => { const i = dowIdx(d); return i === 0 ? CD(25) : i === 6 ? CD(255) : '#15171a'; };
+    for (let d = 1; d <= 31; d++) {
+      const evs = s.events.filter(e => e.day === d).sort(sortEv);
+      const chips = evs.map(e => ({ title: (e.time ? e.time + ' ' : '') + e.title, bg: CL(EVC[e.cat]), fg: CD(EVC[e.cat]), bd: 'transparent' }));
+      if (s.ovTodo) s.todos.filter(t => t.due === d && !t.done).forEach(t => chips.push({ title: '마감 · ' + t.title, bg: '#fff', fg: CD(155), bd: C(155) }));
+      if (s.ovBill) s.recurring.filter(r => r.on && r.day === d && r.type === 'expense').forEach(r => chips.push({ title: '결제 · ' + r.title, bg: '#fff', fg: CD(55), bd: C(55) }));
+      const vis = chips.slice(0, 3); if (chips.length > 3) vis.push({ title: `+${chips.length - 3}개`, bg: '#f1f2f4', fg: '#5b6068', bd: 'transparent' });
+      const sel = s.selDay === d;
+      cells.push({ label: d, wx: WX[d] ? `${WX[d][0]} ${WX[d][2]}°` : '', chips: vis, bg: sel ? CL(255) : '#f7f8f9', ol: sel ? `2px solid ${C(255)}` : 'none', cur: 'pointer',
+        numBg: d === 14 ? '#15171a' : 'transparent', numFg: d === 14 ? '#fff' : dayColor(d), pick: go({ selDay: d }) });
+      lgCells.push({ ...blank, label: d, bg: d === 14 ? CL(55) : '#f7f8f9', numFg: dayColor(d), inc: dayInc[d] ? '+' + won(dayInc[d]) : '', exp: d <= 14 && dayExp[d] ? '−' + won(dayExp[d]) : '' });
+    }
+    while (cells.length % 7) { cells.push(blank); lgCells.push(blank); }
+    const dows = [...DOW.slice(s.weekStart), ...DOW.slice(0, s.weekStart)].map(t => ({ t, c: t === '일' ? CD(25) : t === '토' ? CD(255) : '#5b6068' }));
+    const selEvents = s.events.filter(e => e.day === s.selDay).sort(sortEv).map(evDecor);
+    const swx = WX[s.selDay];
+    const overlays = [['ovTodo', '할일 마감', 155], ['ovBill', '결제일', 55]].map(([k, label, h]) => ({ label, mark: s[k] ? '✓' : '+', bd: s[k] ? C(h) : '#dfe2e6', bg: s[k] ? CL(h) : '#fff', fg: s[k] ? CD(h) : '#5b6068', flip: go({ [k]: !s[k] }) }));
+    const hours = Array.from({ length: 14 }, (_, i) => String(i + 8).padStart(2, '0') + ':00');
+    const weekDays = [12, 13, 14, 15, 16, 17, 18].map(d => ({ date: d, dow: dowOf(d), wx: WX[d] ? `${WX[d][0]} ${WX[d][2]}°` : '', numBg: d === 14 ? '#15171a' : 'transparent', numFg: d === 14 ? '#fff' : dayColor(d), colBg: d === 14 ? 'oklch(0.985 0.01 255)' : 'transparent',
+      evs: s.events.filter(e => e.day === d).map(e => { const [hh, mm] = (e.time || '08:00').split(':').map(Number); return { title: e.title, timeTxt: e.time || '종일', top: Math.max(0, (hh - 8) * 48 + mm * 0.8), h: e.time ? 52 : 30, bg: CL(EVC[e.cat]), fg: CD(EVC[e.cat]), bd: C(EVC[e.cat]) }; }) }));
+    const evCatFilters = ['전체', ...Object.keys(EVC)].map(label => ({ label, ...pill(s.evCat === label), go: go({ evCat: label }) }));
+    const upDays = [...new Set(s.events.filter(e => e.day >= 14 && (s.evCat === '전체' || e.cat === s.evCat)).map(e => e.day))].sort((a, b) => a - b);
+    const upcoming = upDays.map(d => ({ dateTxt: `10월 ${d}일 ${dowOf(d)}`, rel: d === 14 ? '오늘' : d === 15 ? '내일' : `${d - 14}일 후`, wx: WX[d] ? `${WX[d][0]} ${WX[d][2]}° / ${WX[d][3]}°` : '',
+      items: s.events.filter(e => e.day === d && (s.evCat === '전체' || e.cat === s.evCat)).sort(sortEv).map(evDecor) }));
+    const week = [14, 15, 16, 17, 18, 19, 20].map(d => ({ d: dowOf(d), s: WX[d][0], pTxt: WX[d][1] >= 30 ? WX[d][1] + '%' : '', hi: WX[d][2], lo: WX[d][3] }));
+
+    // search
+    const q = s.q.trim().toLowerCase();
+    const all = [
+      ...s.events.map(e => ({ kind: '일정', title: e.title, sub: `10월 ${e.day}일 ${e.time || '종일'} · ${e.place} · ${e.cat}`, right: '', key: (e.title + e.place + e.cat).toLowerCase(), bg: CL(255), fg: CD(255), go: go({ tab: 'cal', calView: 'month', selDay: e.day }) })),
+      ...s.todos.map(t => ({ kind: '할일', title: t.title, sub: `${t.project} · ${t.due ? '10월 ' + t.due + '일 마감' : '마감 없음'} · ${stLabel[status(t)]}`, right: '', key: (t.title + t.project).toLowerCase(), bg: CL(155), fg: CD(155), go: go({ tab: 'todo', todoView: 'list', todoFilter: t.done ? 'done' : 'all' }) })),
+      ...s.txs.map(x => ({ kind: '거래', title: x.title, sub: `10월 ${x.date}일 · ${x.cat} · ${x.account}`, right: (x.type === 'income' ? '+' : '−') + won(x.amount), key: (x.title + x.cat + x.account).toLowerCase(), bg: CL(55), fg: CD(55), go: go({ tab: 'ledger', lgView: 'tx' }) })),
+    ];
+    const matched = q ? all.filter(r => r.key.includes(q)) : [];
+    const searchFilters = ['전체', '일정', '할일', '거래'].map(label => ({ label, n: q ? matched.filter(r => label === '전체' || r.kind === label).length : '', ...pill(s.qType === label), go: go({ qType: label }) }));
+    const results = matched.filter(r => s.qType === '전체' || r.kind === s.qType);
+    const suggestions = ['요가', '식비', '보고서', '회의', '신용카드'].map(t => ({ t, go: go({ q: t }) }));
+
+    // settings
+    const setNav = [['int', '외부 연동'], ['cat', '카테고리·태그'], ['noti', '알림'], ['view', '화면'], ['backup', '백업·내보내기'], ['profile', '프로필·계정']].map(([k, label]) => ({ label, bg: s.setView === k ? '#15171a' : 'transparent', fg: s.setView === k ? '#fff' : '#3f444b', go: go({ setView: k, newToken: '' }) }));
+    const gcals = s.gcals.map((g, i) => ({ name: g.name, color: C(g.h), count: [42, 31, 18, 9][i], ...sw(g.on), flip: () => this.setState(st => ({ gcals: st.gcals.map((x, j) => j === i ? { ...x, on: !x.on } : x) })) }));
+    const notiDefs = [['ev', '일정 알림', '시작 10분 전 · 웹 푸시'], ['todo', '할일 마감 알림', '마감일 오전 9시'], ['b80', '예산 80% 도달', '카테고리별 주의 알림'], ['b100', '예산 초과', '100% 넘으면 즉시 알림'], ['rain', '우산 알림', '비·눈 예보일에 일정이 있으면 전날 저녁'], ['mail', '이메일 알림', '웹 푸시를 받을 수 없을 때 대신']];
+    const notis = notiDefs.map(([k, label, desc]) => ({ label, desc, ...sw(s.notis[k]), flip: () => this.setState(st => ({ notis: { ...st.notis, [k]: !st.notis[k] } })) }));
+    const opt = (cur, val, setter) => ({ label: val, bd: cur === val ? '#15171a' : '#dfe2e6', bg: cur === val ? '#15171a' : '#fff', fg: cur === val ? '#fff' : '#15171a', go: setter });
+    const viewOpts = [
+      { label: '테마', opts: ['라이트', '다크', '시스템'].map(v => opt(s.theme, v, go({ theme: v }))) },
+      { label: '한 주 시작 요일', opts: [['일요일', 0], ['월요일', 1]].map(([v, n]) => opt(s.weekStart === n ? v : '', v, go({ weekStart: n }))) },
+      { label: '통화 단위', opts: [opt('KRW (원)', 'KRW (원)', () => {})] },
+    ];
+    const catGroups = [
+      { title: '일정 카테고리', items: Object.entries(EVC).map(([name, h]) => ({ name, bg: CL(h), fg: CD(h), dot: C(h) })) },
+      { title: '할일 프로젝트', items: [['업무', 255], ['생활', 155], ['개인', 320]].map(([name, h]) => ({ name, bg: CL(h), fg: CD(h), dot: C(h) })) },
+      { title: '가계부 카테고리', items: Object.entries(TXC).filter(([n]) => n !== '급여').map(([name, h]) => ({ name, bg: CL(h), fg: CD(h), dot: C(h) })).concat([{ name: '급여(수입)', bg: CL(255), fg: CD(255), dot: C(255) }]) },
+    ];
+    const cities = ['서울', '성남', '부산', '제주'].map(name => ({ name, bd: s.city === name ? '#15171a' : '#dfe2e6', bg: s.city === name ? '#15171a' : '#fff', fg: s.city === name ? '#fff' : '#15171a', go: go({ city: name }) }));
+    const scopeOpts = ['read', 'read · write'].map(label => ({ label, bd: s.scope === label ? '#15171a' : '#dfe2e6', go: go({ scope: label }) }));
+    const tokens = s.tokens.map(t => ({ ...t, revoke: () => { this.setState(st => ({ tokens: st.tokens.filter(x => x.id !== t.id) })); this.flash(`${t.name} 토큰을 폐기했어요`); } }));
+
+    const qaTypes = [['event', '일정'], ['todo', '할일'], ['tx', '거래']].map(([k, label]) => ({ label, ...pill(s.qaType === k), go: go({ qaType: k, qaErr: '' }) }));
+    const amtDigits = String(s.qaAmt).replace(/\D/g, '');
+    const onSearch = s.tab === 'search', onSet = s.tab === 'settings';
+    return {
+      tabs, hasSub: !!sd, subTabs,
+      goHome: go({ tab: 'home' }), goSearch: go({ tab: 'search' }), goSettings: go({ tab: 'settings' }),
+      searchBtnBg: onSearch ? '#15171a' : '#fff', searchBtnFg: onSearch ? '#fff' : '#3f444b', setBtnBg: onSet ? '#15171a' : '#fff', setBtnFg: onSet ? '#fff' : '#3f444b',
+      isHome: s.tab === 'home', isCalMonth: s.tab === 'cal' && s.calView === 'month', isCalWeek: s.tab === 'cal' && s.calView === 'week', isCalList: s.tab === 'cal' && s.calView === 'list',
+      isTodo: s.tab === 'todo', isTodoList: s.todoView === 'list', isTodoBoard: s.todoView === 'board',
+      isLedger: s.tab === 'ledger', isLgTx: s.lgView === 'tx', isLgCal: s.lgView === 'cal', isLgStats: s.lgView === 'stats', isLgBudget: s.lgView === 'budget', isLgAssets: s.lgView === 'assets', isLgRec: s.lgView === 'rec',
+      isSearch: onSearch, isSettings: onSet,
+      homeCols: wide ? '1.15fr 1fr 1fr' : mid ? '1fr 1fr' : '1fr',
+      homeAreas: wide ? '"greet greet wx" "ev td wx"' : mid ? '"greet greet" "ev td" "wx wx"' : '"greet" "wx" "ev" "td"',
+      splitCols: wide ? 'minmax(0,1fr) 360px' : '1fr', halfCols: mid ? '1fr 1fr' : '1fr', boardCols: mid ? 'repeat(3,minmax(0,1fr))' : '1fr',
+      setCols: mid ? '220px minmax(0,1fr)' : '1fr', setNavDir: mid ? 'column' : 'row',
+      todayEvents, todayEventCount: todayEvents.length, todayTodos, todayDone: todayTodos.filter(t => t.done).length, todayTotal: todayTodos.length,
+      todoLeft: todayTodos.filter(t => !t.done).length, week, city: s.city,
+      gcalBadge: s.gcal ? 'Google 캘린더 동기화됨 · 2분 전' : 'Google 캘린더 연결 안 됨', tokenCount: s.tokens.length,
+      expenseTxt: won(expense), expenseShort: (expense / 10000).toFixed(0) + '만원', incomeTxt: won(income), balanceTxt: won(income - expense), budgetPct, budgetBar: Math.min(budgetPct, 100), budgetTotalTxt: won(budgetTotal), warnBudget, budgets,
+      txFilters, txList, txSumTxt: (txSum >= 0 ? '+' : '−') + won(Math.abs(txSum)) + '원',
+      lgCells, donut: `conic-gradient(${stops.join(',')})`, catShare, trend, momTxt: `9월 대비 ${Math.abs(mom)}% ${mom >= 0 ? '증가' : '감소'}`, momColor: mom >= 0 ? CD(25) : CD(155),
+      accounts, netWorthTxt: won(accountsRaw.reduce((a, x) => a + x.bal, 0)), recurring, recTotalTxt: won(recTotal),
+      dows, cells, overlays, hours, weekDays, evCatFilters, upcoming,
+      selDay: s.selDay, selDow: dowOf(s.selDay), selEvents, selEmpty: selEvents.length === 0,
+      selWx: swx ? `${swx[0]} · 최고 ${swx[2]}° / 최저 ${swx[3]}° · 강수 ${swx[1]}%` : '',
+      todoFilters, todoList, todoEmpty: todoList.length === 0, projects, board,
+      q: s.q, setQ: e => this.setState({ q: e.target.value }), qEmpty: !q, searchFilters, results, hasResults: results.length > 0, noResults: !!q && results.length === 0, suggestions,
+      setNav, isSetInt: s.setView === 'int', isSetCat: s.setView === 'cat', isSetNoti: s.setView === 'noti', isSetView: s.setView === 'view', isSetBackup: s.setView === 'backup', isSetProfile: s.setView === 'profile',
+      gcalOn: s.gcal, gcalStatus: s.gcal ? 'minji@gmail.com · 마지막 동기화 2분 전' : '연결하면 Google 일정과 양방향으로 동기화돼요',
+      gcalBtn: s.gcal ? '연결 해제' : 'Google 계정 연결', gcalBtnBg: s.gcal ? '#f1f2f4' : '#15171a', gcalBtnFg: s.gcal ? '#15171a' : '#fff',
+      toggleGcal: () => { this.setState({ gcal: !s.gcal }); this.flash(s.gcal ? 'Google 캘린더 연결을 해제했어요' : 'Google 캘린더를 연결했어요'); },
+      gcals, cities, scopeOpts, tokens, newToken: s.newToken,
+      issueToken: () => { const raw = 'mcp_' + Array.from({ length: 32 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+        this.setState(st => ({ newToken: raw, tokens: [{ id: uid++, name: `새 토큰 ${st.tokens.length + 1}`, prefix: raw.slice(0, 8), scope: st.scope, last: '사용 전' }, ...st.tokens] })); },
+      mcpLogs: [['12:41', 'ledger.add_transaction', '성공'], ['12:40', 'calendar.get_weather', '성공'], ['09:02', 'todo.list_todos', '성공'], ['어제', 'calendar.delete_event', 'confirm 필요']].map(([t, tool, r]) => ({ t, tool, r, c: r === '성공' ? CD(155) : CD(55) })),
+      catGroups, notis, viewOpts,
+      evCount: s.events.length, tdCount: s.todos.length, txCount: s.txs.length,
+      exportJson: () => this.download('오늘한장-backup.json', JSON.stringify({ events: s.events, todos: s.todos, transactions: s.txs }, null, 2), 'application/json'),
+      exportCsv: () => this.download('거래내역.csv', '\ufeff날짜,내용,카테고리,유형,금액,계좌\n' + s.txs.map(x => `2026-10-${String(x.date).padStart(2, '0')},${x.title},${x.cat},${x.type === 'income' ? '수입' : '지출'},${x.amount},${x.account}`).join('\n'), 'text/csv'),
+      goCal: go({ tab: 'cal', calView: 'month', selDay: 14 }), goToday: go({ selDay: 14 }),
+      openQA: () => this.open(s.tab === 'todo' ? 'todo' : s.tab === 'ledger' ? 'tx' : 'event'),
+      addEventSel: () => this.open('event', { qaDay: s.selDay }), addTodo: () => this.open('todo'), addTx: () => this.open('tx'),
+      closeQA: go({ qaOpen: false }), stop: e => e.stopPropagation(), saveQA: () => this.save(),
+      qaKey: e => { if (e.key === 'Enter') this.save(); },
+      qaOpen: s.qaOpen, qaTypes, qaIsEvent: s.qaType === 'event', qaIsTodo: s.qaType === 'todo', qaIsTx: s.qaType === 'tx',
+      qaTitleLabel: s.qaType === 'tx' ? '내용' : '제목', qaPh: s.qaType === 'event' ? '예) 치과 예약' : s.qaType === 'todo' ? '예) 보고서 제출' : '예) 점심 김밥',
+      qaTitle: s.qaTitle, qaDay: s.qaDay, qaTime: s.qaTime, qaAmtTxt: amtDigits ? won(parseInt(amtDigits)) : '', qaCat: s.qaCat, qaErr: s.qaErr,
+      setTitle: e => this.setState({ qaTitle: e.target.value, qaErr: '' }), setDay: e => this.setState({ qaDay: e.target.value }), setTime: e => this.setState({ qaTime: e.target.value }),
+      setAmt: e => this.setState({ qaAmt: e.target.value, qaErr: '' }), setCat: e => this.setState({ qaCat: e.target.value }),
+      prioOpts: ['상', '중', '하'].map(label => ({ label, bd: s.qaPrio === label ? '#15171a' : '#dfe2e6', go: go({ qaPrio: label }) })),
+      evCatOpts: Object.keys(EVC).filter(k => k !== '기념').map(label => ({ label, bd: s.qaEvCat === label ? C(EVC[label]) : '#dfe2e6', bg: s.qaEvCat === label ? CL(EVC[label]) : '#fff', fg: s.qaEvCat === label ? CD(EVC[label]) : '#5b6068', go: go({ qaEvCat: label }) })),
+      catNames: Object.keys(BUDGET), toast: s.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>

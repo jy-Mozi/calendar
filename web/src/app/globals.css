@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'YeogiOttaeJalnan';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
+body {
+  margin: 0;
+  background: #eef0f3;
+  font-family: YeogiOttaeJalnan, Pretendard, sans-serif;
+  color: #15171a;
+}
+
+a {
+  color: oklch(0.48 0.15 255);
+  text-decoration: none;
+}
+
+a:hover {
+  color: oklch(0.4 0.15 255);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input,
+select,
+button,
+option {
+  font-family: inherit;
+}
