@@ -334,8 +334,9 @@ web/src/
 형식: `날짜 — 내용`. 종류: ✅ 완료(다른 세션이 쓸 수 있는 것) · 📨 요청 · ⛔ 막힘/결정 필요
 
 2026-10-14 — ⛔ 이 PC에 Docker가 없어 `supabase start`/`db reset`/타입 생성/RLS 테스트를 실행할 수 없음. Docker Desktop 설치(또는 원격 Supabase 프로젝트 제공) 필요. 해결 전까지 파트 1은 "SQL 작성 완료, 미검증" 상태.
-2026-10-14 — 📝 작업 위치: 워크트리 `D:\ChaAi\06_calendar-wt\a-foundation-calendar`, 브랜치 `feat/a-foundation-calendar`, 커밋 968bf72. 마이그레이션 `20261014120000_s0a_core_schema.sql`(14개 테이블·RLS), `20261014120100_s0a_new_user_defaults.sql`(가입 트리거), `supabase/tests/rls.sql`. **타입(`types.ts`)은 아직 없음** — DB 기동 후 생성.
+2026-10-14 — 📝 작업 위치: 워크트리 `D:\ChaAi\06_calendar-wt\a-foundation-calendar`, 브랜치 `feat/a-foundation-calendar`, 커밋 6f3f1c9(rebase 후). 마이그레이션 `20261014120000_s0a_core_schema.sql`(14개 테이블·RLS), `20261014120100_s0a_new_user_defaults.sql`(가입 트리거), `supabase/tests/rls.sql`. **타입(`types.ts`)은 아직 없음** — DB 기동 후 생성.
 2026-10-14 — 📝 계약: ① 종일 일정은 start_at/end_at을 KST 자정 시각(UTC 저장)으로, end는 배타적(다음날 자정). ② `integrations.tokens`는 암호문 text, `mcp_tokens.token_hash`와 함께 클라이언트(authenticated)에서 select 불가(컬럼 권한) — 읽기/쓰기는 service role Edge Function. ③ `mcp_logs`는 클라이언트 select/delete만, insert는 service role. ④ `user_id`는 `default auth.uid()`. ⑤ 가입 시 카테고리(일정 5·가계부 9)와 프로젝트(업무·생활·개인) 자동 생성. ⑥ `integrations`는 UNIQUE(user_id, provider), 웹푸시 구독 저장 위치는 S4가 정해 공지.
+2026-10-14 — 📝 인증 코드 작성(원격 DB 연결 전, lint·tsc·build 통과): `web/src/lib/supabase/{client,server,proxy}.ts`, `web/src/proxy.ts`(Next 16 규칙, 비로그인 → /login), `/login`, `/auth/callback`, `/auth/signout`(POST), `.env.example`. `db:types`는 `supabase gen types --linked`(link 후 사용). `lib/db/types.ts`는 임시 `any` 자리표시자 — 첫 db push 후 생성물로 교체. ⛔ 대기: 사용자의 `supabase login`·프로젝트 ref·첫 `db push` 승인.
 
 ## 받은 요청 (다른 세션이 한 줄씩 추가)
 - 2026-10-14 C→A: `weather_cache`에 `UNIQUE(lat_key, lon_key)`를 두고 두 키를 numeric(소수 1자리 반올림 값)으로 정의해 주세요. weather Edge Function이 upsert에 사용합니다.
